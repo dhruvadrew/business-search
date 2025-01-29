@@ -96,7 +96,6 @@ def extract_mailing_address_and_changed_date(html):
                 
                 # Find the next span after the mailing address for the "Changed: " text
                 changed_date_span = span.find_next("span", string=lambda text: text and text.startswith("Changed:"))
-                print(changed_date_span)
                 if changed_date_span:
                     # Extract the date part after "Changed: "
                     changed_date = changed_date_span.text.strip().replace("Changed: ", "")
@@ -106,6 +105,132 @@ def extract_mailing_address_and_changed_date(html):
                 return mailing_address, changed_date  # Return both mailing address and changed date
 
     return "", None  # Return empty strings if no matching section is found
+
+def extract_officer_director_details(html):
+    soup = BeautifulSoup(html, "html.parser")
+    
+    # Find all divs with class "detailSection"
+    detail_sections = soup.find_all("div", class_="detailSection")
+    
+    # Initialize a list to store officer/director details
+    officer_details = []
+    
+    # Initialize an array to store names
+    names = []
+    
+    # Loop through each detailSection to find the one with "Officer/Director Detail"
+    for detail_section in detail_sections:
+        span = detail_section.find("span", string="Officer/Director Detail")
+        if not span:
+            span = detail_section.find("span", string="Authorized Person(s) Detail")
+        if span:            
+            # Skip the next span
+            next_span = span.find_next("span")
+            
+            # Find the second span which starts with "Title "
+            title_span = next_span.find_next("span", string=lambda text: text and text.startswith("Title"))
+            if title_span:
+                # Extract the officer title
+                officer_title = title_span.text[6:]
+                
+                # Skip the next two <br> elements to get to the officer name (plain text)
+                title_span.find_next("br")  # Skip first <br>
+                title_span.find_next("br")  # Skip second <br>
+                
+                # The officer name is two lines after the title
+                officer_name = title_span.find_next("br").find_next("br").find_next(text=True).strip()
+                
+                # Add the officer name to the names array
+                names.append(officer_name)
+                
+                # The officer address is in the next div after the officer name
+                address_div = title_span.find_next("span").find_next("div")
+                officer_address = ""
+                if address_div:
+                    # Combine all the text from the div's children with new lines
+                    address_parts = [line.strip() for line in address_div.stripped_strings]
+                    officer_address = "\n".join(address_parts)
+                
+                # Add the officer details to the list
+                officer_details.append({
+                    "officer_title": officer_title,
+                    "officer_name": officer_name,
+                    "officer_address": officer_address
+                })
+                
+                # Now look for any subsequent officer/director details
+                next_officer_span = title_span.find_next("span", string=lambda text: text and text.startswith("Title"))
+                print(next_officer_span)
+                while next_officer_span:
+                    # Extract the title, name, and address for each officer
+                    officer_title = next_officer_span.text[6:]
+                    
+                    # Extract the officer name (plain text)
+                    officer_name = next_officer_span.find_next("br").find_next("br").find_next(text=True).strip()
+                    
+                    # Extract the address from the next div
+                    address_div = next_officer_span.find_next("span").find_next("div")
+                    officer_address = ""
+                    if address_div:
+                        address_parts = [line.strip() for line in address_div.stripped_strings]
+                        officer_address = "\n".join(address_parts)
+                    
+                    # Add the officer details to the list
+                    officer_details.append({
+                        "officer_title": officer_title,
+                        "officer_name": officer_name,
+                        "officer_address": officer_address
+                    })
+                    
+                    # Look for the next officer/director title
+                    next_officer_span = next_officer_span.find_next("span", string=lambda text: text and text.startswith("Title "))
+    
+    return officer_details
+
+
+
+def extract_registered_agent_details(html):
+    soup = BeautifulSoup(html, "html.parser")
+    
+    # Find all divs with class "detailSection"
+    detail_sections = soup.find_all("div", class_="detailSection")
+    
+    # Initialize variables to store the extracted data
+    registered_agent_name = ""
+    registered_agent_address = ""
+    name_changed = ""
+    address_changed = ""
+    
+    # Loop through each detailSection to find the one with "Registered Agent Name & Address"
+    for detail_section in detail_sections:
+        span = detail_section.find("span", string="Registered Agent Name & Address")
+        if span:
+            # Find the next span for the registered agent name
+            registered_agent_name_span = span.find_next("span")
+            if registered_agent_name_span:
+                registered_agent_name = registered_agent_name_span.text.strip()
+            
+            # Find the next div for the registered agent address
+            address_div = registered_agent_name_span.find_next("span").find_next("div")
+            if address_div:
+                # Combine all the text from the div's children with new lines
+                address_parts = [line.strip() for line in address_div.stripped_strings]
+                registered_agent_address = "\n".join(address_parts)
+            
+            # Check for "Name Changed: " span
+            name_changed_span = span.find_next("span", string=lambda text: text and text.startswith("Name Changed:"))
+            if name_changed_span:
+                name_changed = name_changed_span.text.strip().replace("Name Changed: ", "")
+            
+            # Check for "Address Changed: " span
+            address_changed_span = span.find_next("span", string=lambda text: text and text.startswith("Address Changed:"))
+            if address_changed_span:
+                address_changed = address_changed_span.text.strip().replace("Address Changed: ", "")
+            
+            return registered_agent_name, registered_agent_address, name_changed, address_changed
+    
+    # Return empty strings if no matching section is found
+    return "", "", "", ""
 
 
 def extract_annual_reports(html):
@@ -169,6 +294,18 @@ async def extract_business_details(page):
     document_urls = []
     document_urls = extract_document_images(html)
 
+    # Extract registered agent details
+    registered_agent_name, registered_agent_address, name_changed, address_changed = extract_registered_agent_details(html)
+    business_data["registered_agent_name"] = registered_agent_name
+    business_data["registered_agent_address"] = registered_agent_address
+    business_data["name_changed"] = name_changed
+    business_data["address_changed"] = address_changed
+
+    # Extract officer/director details
+    officer_details = extract_officer_director_details(html)
+    print(officer_details)
+    business_data["officer_details"] = officer_details
+
     business_data["annual_reports"] = annual_reports
     business_data["document_urls"] = document_urls
 
@@ -181,12 +318,10 @@ async def extract_business_details(page):
 def save_to_database(data):
     """Save extracted data to the database."""
 
-    # Ensure that the changed_date is set to None if it's empty
-    if not data.get("mailing_changed"):
-        data["mailing_changed"] = None  # Set to None if empty
-
-    if not data.get("principal_changed"):
-        data["principal_changed"] = None  # Set to None if empty
+    # Ensure that empty strings are treated as None so Date Crashing doesn't break program
+    for key, value in data.items():
+        if value == "":
+            data[key] = None  # Set empty strings to None for database
 
     supabase.table("businesses").insert(data).execute()
     print(f"Successfully saved business: {data['name']}")
