@@ -260,17 +260,22 @@ def extract_annual_reports(html):
 
                 return report_data  # Return the first matching report data
 
+async def get_inner_text_or_none(page, selector):
+    element = await page.query_selector(selector)
+    return await element.inner_text() if element else None  # Return None if element not found
+
+
 async def extract_business_details(page):
     """Extract business details from the page."""
     business_data = {
-        'name': await page.inner_text('div.corporationName p:nth-child(2)'),
-        'document_number': await page.inner_text('label[for="Detail_DocumentId"] + span'),
-        'fei_ein_number': await page.inner_text('label[for="Detail_FeiEinNumber"] + span'),
-        'date_filed': await page.inner_text('label[for="Detail_FileDate"] + span'),
-        'state': await page.inner_text('label[for="Detail_EntityStateCountry"] + span'),
-        'status': await page.inner_text('label[for="Detail_Status"] + span'),
-        'last_event': await page.inner_text('label[for="Detail_LastEvent"] + span'),
-        'event_date_filed': await page.inner_text('label[for="Detail_LastEventFileDate"] + span'),
+    'name': await get_inner_text_or_none(page, 'div.corporationName p:nth-child(2)'),
+    'document_number': await get_inner_text_or_none(page, 'label[for="Detail_DocumentId"] + span'),
+    'fei_ein_number': await get_inner_text_or_none(page, 'label[for="Detail_FeiEinNumber"] + span'),
+    'date_filed': await get_inner_text_or_none(page, 'label[for="Detail_FileDate"] + span'),
+    'state': await get_inner_text_or_none(page, 'label[for="Detail_EntityStateCountry"] + span'),
+    'status': await get_inner_text_or_none(page, 'label[for="Detail_Status"] + span'),
+    'last_event': await get_inner_text_or_none(page, 'label[for="Detail_LastEvent"] + span'),
+    'event_date_filed': await get_inner_text_or_none(page, 'label[for="Detail_LastEventFileDate"] + span'),
     }
 
     html = await page.content()
@@ -330,6 +335,7 @@ async def crawl_and_save_html(user_input: str):
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True, slow_mo=0)  # Set to True to run in headless mode
         page = await browser.new_page()
+        names = []
 
         # Navigate to the Florida Secretary of State business search page
         print("Navigating to the page...")
@@ -355,28 +361,42 @@ async def crawl_and_save_html(user_input: str):
             # Get the first link
             first_link = links[0]
             href = await first_link.get_attribute('href')
-            print(f"Opening the first link: {href}")
+            name = await first_link.text_content()
+            print(f"Opening the first link")
 
-            # Click the first link
-            await first_link.click()
+            if supabase.table("businesses").select("*").eq("name", name).execute().data:
+                print(f"Business already exists in database: {name}")
+                names.append(name)
+            else:
 
-            # Wait for the page to load
-            #await page.wait_for_load_state('networkidle')
+                # Click the first link
+                await first_link.click()
+                name = await get_inner_text_or_none(page, 'div.corporationName p:nth-child(2)')
+                if supabase.table("businesses").select("*").eq("name", name).execute().data:
+                    print(f"Business already exists in database: {name}")
+                    await page.go_back()
+                    links = await page.query_selector_all('table tbody a[href]')
+                    names.append(name)
+                else:
 
-            # Extract business details
-            print("Extracting business details...")
-            business_data = await extract_business_details(page)
+                    # Wait for the page to load
+                    #await page.wait_for_load_state('networkidle')
 
-            # Save business details to the database
-            print("Saving business details to the database...")
-            save_to_database(business_data)
+                    # Extract business details
+                    print("Extracting business details...")
+                    business_data = await extract_business_details(page)
 
-            # Go back to the previous page
-            print("Going back to the previous page...")
-            await page.go_back()
+                    # Save business details to the database
+                    print("Saving business details to the database...")
+                    save_to_database(business_data)
+                    names.append(business_data["name"])
 
-            # Wait for the page to load again after going back
-            #await page.wait_for_load_state('networkidle')
+                    # Go back to the previous page
+                    print("Going back to the previous page...")
+                    await page.go_back()
+
+                    # Wait for the page to load again after going back
+                    #await page.wait_for_load_state('networkidle')
 
             # Re-query the links after going back to ensure they're valid
             print("Re-querying the links after going back...")
@@ -387,10 +407,25 @@ async def crawl_and_save_html(user_input: str):
             for i in range(1, j):
                 link = links[i]
                 href = await link.get_attribute('href')
-                print(f"Opening link {i+1}: {href}")
+                name = await link.text_content()
+                print(name)
+
+                if supabase.table("businesses").select("*").eq("name", name).execute().data:
+                    print(f"Business already exists in database: {name}")
+                    names.append(name)
+                    continue
+                print(f"Opening link {i+1}")
 
                 # Click the link
                 await link.click()
+
+                name = await page.inner_text('div.corporationName p:nth-child(2)')
+
+                if supabase.table("businesses").select("*").eq("name", name).execute().data:
+                    print(f"Business already exists in database: {name}")
+                    await page.go_back()
+                    links = await page.query_selector_all('table tbody a[href]')
+                    continue
 
                 # Wait for the page to load
                 #await page.wait_for_load_state('networkidle')
@@ -402,10 +437,12 @@ async def crawl_and_save_html(user_input: str):
                 # Save business details to the database
                 print("Saving business details to the database...")
                 save_to_database(business_data)
+                names.append(business_data["name"])
 
                 # Go back to the previous page
                 print(f"Going back to the previous page after opening link {i+1}...")
                 await page.go_back()
+                
 
                 # Wait for the page to load again after going back
                 #await page.wait_for_load_state('networkidle')
@@ -418,3 +455,5 @@ async def crawl_and_save_html(user_input: str):
 
         # Close the browser
         await browser.close()
+
+        return names

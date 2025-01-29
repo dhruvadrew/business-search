@@ -39,13 +39,22 @@ async def crawl(user_data: UserData):
         user_input = user_data.user_input
         
         # Run the async crawling function
-        await crawl_and_save_html(user_input)
+        names = await crawl_and_save_html(user_input)
         
         # Return success response
-        return JSONResponse(content={"message": "Crawl successful"}, status_code=200)
+        return JSONResponse(content={"message": "Crawl successful", "names": names}, status_code=200)
     except Exception as e:
         # Return error response if the process fails
         return JSONResponse(content={"message": "Crawl failed", "error": str(e)}, status_code=500)
+    
+@app.get("/business/{business_name}")
+async def get_business_info(business_name: str):
+    response = table.select("*").eq("name", business_name).execute()
+    
+    if response.data:
+        return response.data[0]  # Return the first matching business
+    else:
+        raise HTTPException(status_code=404, detail="Business not found")
 
 if __name__ == "__main__":
     import uvicorn
