@@ -423,6 +423,7 @@ async def crawl_and_save_html(user_input: str):
 
                 if supabase.table("businesses").select("*").eq("name", name).execute().data:
                     print(f"Business already exists in database: {name}")
+                    names.append(name)
                     await page.go_back()
                     links = await page.query_selector_all('table tbody a[href]')
                     continue

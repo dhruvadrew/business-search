@@ -104,7 +104,7 @@ export default function Search() {
   return (
     <div className="w-full max-w-3xl space-y-4 overflow-hidden"> {/* Prevent main page scroll */}
       {/* Sticky header with title, rotating text, and search bar */}
-      <div className="sticky top-0 z-10 w-full p-4"> {/* Set background to blue */}
+      <div className="sticky top-0 z-10 w-full p-4 bg-white shadow-md mb-4" style={{ marginTop: "150px" }}> {/* Add margin-top to shift everything down */}
         <h1 className="text-4xl md:text-5xl font-bold mb-4 text-center text-black">Florida Secretary of State Business Search</h1>
         <RotatingText />
         <div className="relative mb-4"> {/* Search bar with margin */}
@@ -149,7 +149,7 @@ export default function Search() {
 
       {/* Light Blue div for business cards */}
       {data && (
-        <div className="bg-white-100 p-4 space-y-4 mt-10 overflow-y-auto max-h-[80vh]"> {/* Enable scrolling inside this div */}
+        <div className="bg-white p-4 space-y-4 mt-10 overflow-y-auto max-h-[80vh]"> {/* Enable scrolling inside this div */}
           <div className="space-y-4">
             {data.map((business, index) => (
               <div
