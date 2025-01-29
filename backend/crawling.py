@@ -45,6 +45,69 @@ def extract_document_images(html):
     return []  # Return an empty list if no matching section is found
 
 
+def extract_principal_address_and_changed_date(html):
+    soup = BeautifulSoup(html, "html.parser")
+    
+    # Find all divs with class "detailSection"
+    detail_sections = soup.find_all("div", class_="detailSection")
+    
+    # Loop through each detailSection to find the one with "Principal Address"
+    for detail_section in detail_sections:
+        span = detail_section.find("span", string="Principal Address")
+        if span:
+            # Find the next span element and the div inside it for the principal address
+            address_div = span.find_next("span").find_next("div")
+            if address_div:
+                # Combine all the text from the div's children with new lines
+                address_parts = [line.strip() for line in address_div.stripped_strings]
+                principal_address = "\n".join(address_parts)
+            else:
+                principal_address = ""  # If no address div is found, set it to empty string
+            
+            # Find the next span after the principal address for the "Changed: " text
+            changed_date_span = span.find_next("span", string=lambda text: text and text.startswith("Changed:"))
+            if changed_date_span:
+                # Extract the date part after "Changed: "
+                changed_date = changed_date_span.text.strip().replace("Changed: ", "")
+            else:
+                changed_date = ""  # If "Changed: " span is not found, set it as empty
+
+            return principal_address, changed_date  # Return both principal address and changed date
+
+    return "", ""  # Return empty strings if no matching section is found
+
+
+def extract_mailing_address_and_changed_date(html):
+    soup = BeautifulSoup(html, "html.parser")
+    
+    # Find all divs with class "detailSection"
+    detail_sections = soup.find_all("div", class_="detailSection")
+    
+    # Loop through each detailSection to find the one with "Mailing Address"
+    for detail_section in detail_sections:
+        span = detail_section.find("span", string="Mailing Address")
+        if span:
+            # Find the next span element and the div inside it for the mailing address
+            address_div = span.find_next("span").find_next("div")
+            if address_div:
+                # Combine all the text from the div's children with new lines
+                address_parts = [line.strip() for line in address_div.stripped_strings]
+                mailing_address = "\n".join(address_parts)
+                
+                # Find the next span after the mailing address for the "Changed: " text
+                changed_date_span = span.find_next("span", string=lambda text: text and text.startswith("Changed:"))
+                print(changed_date_span)
+                if changed_date_span:
+                    # Extract the date part after "Changed: "
+                    changed_date = changed_date_span.text.strip().replace("Changed: ", "")
+                else:
+                    changed_date = ""  # If "Changed: " span is not found, set it as empty
+
+                return mailing_address, changed_date  # Return both mailing address and changed date
+
+    return "", None  # Return empty strings if no matching section is found
+
+
 def extract_annual_reports(html):
     soup = BeautifulSoup(html, "html.parser")
     
@@ -84,8 +147,19 @@ async def extract_business_details(page):
         'last_event': await page.inner_text('label[for="Detail_LastEvent"] + span'),
         'event_date_filed': await page.inner_text('label[for="Detail_LastEventFileDate"] + span'),
     }
-    print(business_data)
+
     html = await page.content()
+
+    # Extract principal address
+    principal_address, principal_changed = extract_principal_address_and_changed_date(html)
+    business_data["principal_address"] = principal_address
+    business_data["principal_changed"] = principal_changed
+    
+
+    # Extract mailing address
+    mailing_address, changed_date = extract_mailing_address_and_changed_date(html)
+    business_data["mailing_address"] = mailing_address
+    business_data["mailing_changed"] = changed_date
 
     # Extract annual reports
     annual_reports = []
@@ -98,12 +172,22 @@ async def extract_business_details(page):
     business_data["annual_reports"] = annual_reports
     business_data["document_urls"] = document_urls
 
+    print(business_data)
+
     return business_data
 
 
 
 def save_to_database(data):
     """Save extracted data to the database."""
+
+    # Ensure that the changed_date is set to None if it's empty
+    if not data.get("mailing_changed"):
+        data["mailing_changed"] = None  # Set to None if empty
+
+    if not data.get("principal_changed"):
+        data["principal_changed"] = None  # Set to None if empty
+
     supabase.table("businesses").insert(data).execute()
     print(f"Successfully saved business: {data['name']}")
 
