@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from databases import Database
 from pydantic import BaseModel
@@ -15,9 +16,40 @@ key = os.getenv("DATABASE_KEY")
 
 app = FastAPI()
 
+# ✅ Enable CORS Middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3001"],  # Allow only your frontend
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all HTTP methods
+    allow_headers=["*"],  # Allow all headers
+)
+
 supabase: Client = create_client(url, key)
 
 table = supabase.table("businesses")
+
+# Define request model
+class BusinessNamesRequest(BaseModel):
+    names: list[str]  # ✅ Ensures input is a JSON array
+
+@app.post("/businesses")
+async def get_multiple_businesses(request: BusinessNamesRequest):
+    results = []
+    print("Received names:", request.names)
+
+    for name in request.names:
+        response = supabase.table("businesses").select("*").eq("name", name).execute()
+        
+        # Extract data from Supabase response
+        data = response.data
+        if data:
+            results.extend(data)  # Append results if found
+
+    if not results:
+        return JSONResponse(content={"detail": "No businesses found"}, status_code=404)
+
+    return results
 
 @app.get("/business/{business_name}")
 async def get_business_info(business_name: str):

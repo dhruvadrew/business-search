@@ -9,12 +9,14 @@ const queryClient = new QueryClient()
 export default function Home() {
   return (
     <QueryClientProvider client={queryClient}>
-      <main className="container mx-auto p-4 min-h-screen flex flex-col items-center justify-center">
+      <main className="container mx-auto p-4 min-h-screen flex flex-col items-center justify-start">
         <h1 className="text-4xl md:text-5xl font-bold mb-4 text-center">Florida Secretary of State Business Search</h1>
         <RotatingText />
+        {/* Title & Rotating Text will stay fixed */}
+
+        {/* Search bar below the fixed title */}
         <Search />
       </main>
     </QueryClientProvider>
   )
 }
-
