@@ -1,36 +1,127 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Florida Secretary of State Business Search Tool
 
-## Getting Started
+This project is a web application built with Next.js that allows users to search for registered businesses in Florida.  It leverages a backend service to crawl and scrape data from the Florida Secretary of State's website and store it in a Supabase database. The application provides a user-friendly interface for searching and viewing detailed business information.
 
-First, run the development server:
+## Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+* **Search Businesses:** Search for businesses by name.
+* **Detailed Business Information:** View comprehensive details for each business, including name, document number, FEI/EIN number, filing date, status, principal address, mailing address, registered agent information, officer details, annual reports, and document URLs.
+* **Mock Data Handling:** Gracefully handles cases where the external API is unavailable by displaying mock data and notifying the user.
+* **Loading State Indication:** Displays a loading spinner while fetching data.
+* **Error Handling:** Provides clear error messages when API requests fail.
+* **Responsive Design:** Adapts seamlessly to various screen sizes.
+* **Efficient Data Fetching:** Uses React Query for efficient data fetching and caching.
+* **Animated UI Elements:**  Includes animations for a smoother user experience.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Usage
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1.  **Run the development server:**
+    ```bash
+    npm run dev
+    # or
+    yarn dev
+    # or
+    pnpm dev
+    # or
+    bun dev
+    ```
+2.  Open [http://localhost:3000](http://localhost:3000) in your browser.
+3.  Enter a business name in the search bar and press Enter or click the search button.
+4.  View the search results with detailed business information.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Installation
 
-## Learn More
+1.  Clone the repository:
+    ```bash
+    git clone <repository_url>
+    ```
+2.  Navigate to the project directory:
+    ```bash
+    cd business-search-tool
+    ```
+3.  Install dependencies:
+    ```bash
+    npm install
+    # or
+    yarn install
+    # or
+    pnpm install
+    # or
+    bun install
+    ```
+4.  Start the backend server (located in the `backend` directory). You'll need Python 3 and the required packages (as defined in `backend/requirements.txt`, if present).
+5.  Run the development server using the command provided in the Usage section.
 
-To learn more about Next.js, take a look at the following resources:
+## Technologies Used
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+* **Next.js:** A React framework for building web applications. Used for the frontend of the application.
+* **React:** A JavaScript library for building user interfaces. Used for the frontend components.
+* **Tailwind CSS:** A utility-first CSS framework. Used for styling the application.
+* **@tanstack/react-query:**  A data fetching library for React.  Handles asynchronous data fetching and caching efficiently.
+* **Lucide:**  An icon library providing the icons used in the application.
+* **Playwright:**  A Node library used for web automation, particularly in the backend to crawl and scrape data.
+* **FastAPI:** A modern, fast (high-performance), web framework for building APIs with Python 3.7+ based on standard Python type hints.  Used for the backend API.
+* **Supabase:** A backend-as-a-service (BaaS) platform, providing database (PostgreSQL) and other functionalities. Used for persistent storage of business data.
+* **Python:** Used for the backend server's logic (web scraping and data processing).
+* **Beautiful Soup:** Python library for parsing HTML and XML documents. Used for extracting data from web pages.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## Deploy on Vercel
+## API Documentation
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The backend API (located in the `backend` directory) exposes the following endpoints:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+**POST `/crawl`**
+
+*   **Request Body:**
+    ```json
+    {
+      "user_input": "string"
+    }
+    ```
+*   **Response:**
+    ```json
+    {
+      "message": "Crawl successful",
+      "names": ["business_name_1", "business_name_2", ...]
+    }
+    ```
+    or
+    ```json
+    {
+      "message": "Crawl failed",
+      "error": "string"
+    }
+    ```
+
+**POST `/businesses`**
+
+*   **Request Body:**
+    ```json
+    {
+      "names": ["business_name_1", "business_name_2", ...]
+    }
+    ```
+*   **Response:** (Array of business objects or 404 error if not found)
+
+
+**GET `/business/{business_name}`**
+
+*   **Response:** A JSON object representing the business details.  Or a 404 if not found.
+
+
+## Dependencies
+
+The project dependencies are listed in the `package.json` file.  The backend dependencies (if any) should be listed in a `requirements.txt` file in the `backend` directory.
+
+## Contributing
+
+Contributions are welcome! Please open an issue or submit a pull request.
+
+## Testing
+
+(Add testing instructions if applicable)
+
+
+
+*README.md was made with [Etchr](https://etchr.dev)*
