@@ -11,6 +11,40 @@ key = os.getenv("DATABASE_KEY")
 
 supabase: Client = create_client(url, key)
 
+def extract_document_images(html):
+    soup = BeautifulSoup(html, "html.parser")
+    
+    # Find all divs with class "detailSection"
+    detail_sections = soup.find_all("div", class_="detailSection")
+    
+    # Loop through each detailSection to find the one with "Document Images"
+    for detail_section in detail_sections:
+        span = detail_section.find("span", string="Document Images")
+        if span:
+            # Find the next table after this span
+            table = span.find_next("table")
+            if table:
+                # Extract rows from tbody
+                rows = table.find("tbody").find_all("tr")
+                
+                document_data = []
+                for row in rows:  # Iterate through all rows without skipping
+                    cols = row.find_all("td")
+                    if len(cols) >= 2:
+                        # Assuming the first column contains the document name or ID
+                        document_name = cols[0].text.strip()
+                        # Assuming the second column contains the link to the document image
+                        document_url = cols[1].find("a")["href"] if cols[1].find("a") else None
+                        if document_url:
+                            # Prepend the base URL to the document URL
+                            full_url = "https://search.sunbiz.org" + document_url
+                            document_data.append({"Document Name": document_name, "Document URL": full_url})
+
+                return document_data  # Return the first matching document data
+
+    return []  # Return an empty list if no matching section is found
+
+
 def extract_annual_reports(html):
     soup = BeautifulSoup(html, "html.parser")
     
@@ -51,19 +85,15 @@ async def extract_business_details(page):
         'event_date_filed': await page.inner_text('label[for="Detail_LastEventFileDate"] + span'),
     }
     print(business_data)
+    html = await page.content()
 
     # Extract annual reports
     annual_reports = []
-    html = await page.content()
     annual_reports = extract_annual_reports(html)
 
     # Extract document URLs
     document_urls = []
-    document_rows = await page.query_selector_all("table:has(span:text('Document Images')) tr")
-    for row in document_rows[1:]:  # Skip header row
-        link = await row.query_selector("a[href]")
-        if link:
-            document_urls.append(await link.get_attribute("href"))
+    document_urls = extract_document_images(html)
 
     business_data["annual_reports"] = annual_reports
     business_data["document_urls"] = document_urls
