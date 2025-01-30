@@ -1,5 +1,4 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { generateMockData } from "../utils/mockData"
 
 const API_URL = "https://your-api-endpoint.com/search" // Replace with your actual API endpoint
 
