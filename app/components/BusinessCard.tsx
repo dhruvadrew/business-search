@@ -198,13 +198,14 @@ export default function BusinessCard({ business }: { business: BusinessData }) {
                     </li>
                   )
                 } catch (error) {
+                  console.log(error)
                   return null
                 }
               })}
             </ul>
           </div>
         </div>
-        {!isExpanded && <p className="text-sm text-gray-500">Click 'View Details' to see more information.</p>}
+        {!isExpanded && <p className="text-sm text-gray-500">Click View Details to see more information.</p>}
       </CardContent>
     </Card>
   )

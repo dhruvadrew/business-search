@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, UseQueryOptions } from "@tanstack/react-query"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { SearchIcon } from "lucide-react"
@@ -27,9 +27,16 @@ interface BusinessData {
   registered_agent_address: string
   name_changed: string
   address_changed: string
-  officer_details: any
+  officer_details: OfficerDetail[]
   annual_reports: string[]
   document_urls: string[]
+}
+
+//make officer details interface
+interface OfficerDetail {
+  officer_name: string;  // Name of the officer
+  officer_title: string; // Title of the officer (e.g., "President", "CEO", etc.)
+  officer_address: string; // Full address of the officer (as a single string)
 }
 
 const getBusinessesFromDatabase = async (names: string[]): Promise<BusinessData[]> => {
@@ -85,16 +92,17 @@ const fetchBusinesses = async (query: string): Promise<BusinessData[]> => {
 };
 
 export default function Search() {
-  const [query, setQuery] = useState("")
-  const [isMockData, setIsMockData] = useState(false)
+  const [query, setQuery] = useState("");
+  const [isMockData, setIsMockData] = useState(false);
+
   const { data, isLoading, isError, refetch } = useQuery<BusinessData[], Error>({
     queryKey: ["businesses", query],
     queryFn: () => fetchBusinesses(query),
     enabled: false,
-    onSuccess: (data) => {
-      setIsMockData(data.length > 0 && data[0].name.includes(query))
+    onSuccess: (data: BusinessData[]) => {
+      setIsMockData(data.length > 0 && data[0].name.includes(query));
     },
-  })
+  } as UseQueryOptions<BusinessData[], Error>);
 
   const handleSearch = () => {
     setIsMockData(false)
@@ -131,7 +139,7 @@ export default function Search() {
 
       {/* Mock data warning */}
       {isMockData && (
-        <Alert variant="warning">
+        <Alert variant="default">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Note</AlertTitle>
           <AlertDescription>Displaying mock data. The actual API may be unavailable.</AlertDescription>
@@ -143,7 +151,7 @@ export default function Search() {
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Error</AlertTitle>
-          <AlertDescription>{error.message}</AlertDescription>
+          <AlertDescription>You have run into an unexpected error. Reload page to try again!</AlertDescription>
         </Alert>
       )}
 

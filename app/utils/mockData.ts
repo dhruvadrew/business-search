@@ -1,5 +1,35 @@
-export function generateMockData(query: string): any[] {
-  const mockBusinesses = [
+interface OfficerDetail {
+  officer_name: string;  // Name of the officer
+  officer_title: string; // Title of the officer (e.g., "President", "CEO", etc.)
+  officer_address: string; // Full address of the officer (as a single string)
+}
+
+// Interface for the business data structure
+interface BusinessData {
+  name: string;
+  document_number: string;
+  fei_ein_number: string;
+  date_filed: string;
+  state: string;
+  status: string;
+  last_event: string;
+  event_date_filed: string;
+  principal_address: string;
+  principal_changed: string;
+  mailing_address: string;
+  mailing_changed: string;
+  registered_agent_name: string;
+  registered_agent_address: string;
+  name_changed: string;
+  address_changed: string;
+  officer_details: OfficerDetail[]; // Using OfficerDetails interface
+  annual_reports: string[]; // List of annual report years as strings
+  document_urls: string[]; // List of document URLs
+}
+
+// Function to generate mock data
+export function generateMockData(query: string): BusinessData[] {
+  const mockBusinesses: BusinessData[] = [
     {
       name: `${query} Florida Inc.`,
       document_number: `F${Math.floor(Math.random() * 1000000)}`,
@@ -17,11 +47,11 @@ export function generateMockData(query: string): any[] {
       registered_agent_address: `${Math.floor(Math.random() * 1000) + 1} Agent St, Miami, FL ${Math.floor(Math.random() * 89999) + 10000}`,
       name_changed: new Date(Date.now() - Math.floor(Math.random() * 1000000000000)).toISOString().split("T")[0],
       address_changed: new Date(Date.now() - Math.floor(Math.random() * 1000000000000)).toISOString().split("T")[0],
-      officer_details: JSON.stringify({
-        president: "Jane Smith",
-        vice_president: "Bob Johnson",
-        secretary: "Alice Brown",
-      }),
+      officer_details: [{
+        officer_name: "Jane Smith",
+        officer_title: "Bob Johnson",
+        officer_address: "Alice Brown",
+      }],
       annual_reports: [
         new Date(Date.now() - Math.floor(Math.random() * 31536000000)).getFullYear().toString(),
         new Date(Date.now() - Math.floor(Math.random() * 63072000000)).getFullYear().toString(),
@@ -50,10 +80,11 @@ export function generateMockData(query: string): any[] {
       registered_agent_address: `${Math.floor(Math.random() * 1000) + 1} Agent Ave, Orlando, FL ${Math.floor(Math.random() * 89999) + 10000}`,
       name_changed: new Date(Date.now() - Math.floor(Math.random() * 1000000000000)).toISOString().split("T")[0],
       address_changed: new Date(Date.now() - Math.floor(Math.random() * 1000000000000)).toISOString().split("T")[0],
-      officer_details: JSON.stringify({
-        manager: "Michael Davis",
-        member: "Emily Wilson",
-      }),
+      officer_details: [{
+        officer_name: "Jane Smith",
+        officer_title: "Bob Johnson",
+        officer_address: "Alice Brown",
+      }],
       annual_reports: [
         new Date(Date.now() - Math.floor(Math.random() * 31536000000)).getFullYear().toString(),
         new Date(Date.now() - Math.floor(Math.random() * 63072000000)).getFullYear().toString(),
@@ -63,8 +94,7 @@ export function generateMockData(query: string): any[] {
         `http://example.com/docs/${Math.floor(Math.random() * 1000000)}`,
       ],
     },
-  ]
+  ];
 
-  return mockBusinesses
+  return mockBusinesses;
 }
-

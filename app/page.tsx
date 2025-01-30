@@ -2,7 +2,6 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import Search from "./components/Search"
-import RotatingText from "./components/RotatingText"
 
 const queryClient = new QueryClient()
 
