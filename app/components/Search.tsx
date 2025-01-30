@@ -151,7 +151,7 @@ export default function Search() {
       {data && (
         <div className="bg-white p-4 space-y-4 mt-10 overflow-y-auto max-h-[80vh]"> {/* Enable scrolling inside this div */}
           <div className="space-y-4">
-            {data.map((business, index) => (
+            {data.map((business: BusinessData, index: number) => (
               <div
                 key={index}
                 className="transition-all duration-500 ease-in-out"
