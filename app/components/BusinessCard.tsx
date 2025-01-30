@@ -5,6 +5,13 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ChevronDown, ChevronUp } from "lucide-react"
 
+// Define an interface for the OfficerDetails
+interface OfficerDetail {
+  officer_name: string
+  officer_title: string
+  officer_address: string
+}
+
 interface BusinessData {
   name: string
   document_number: string
@@ -22,9 +29,9 @@ interface BusinessData {
   registered_agent_address: string
   name_changed: string
   address_changed: string
-  officer_details: any
+  officer_details: OfficerDetail[] // Specific type instead of 'any'
   annual_reports: string[]  // Stringified JSON array
-  document_urls: string[]
+  document_urls: string[] // Document URLs in stringified JSON format
 }
 
 export default function BusinessCard({ business }: { business: BusinessData }) {
@@ -139,7 +146,7 @@ export default function BusinessCard({ business }: { business: BusinessData }) {
             {/* Officer Details */}
             <p><strong>Officer Details:</strong></p>
             <div className="space-y-2">
-              {business.officer_details && business.officer_details.map((officer: any, index: number) => {
+              {business.officer_details && business.officer_details.map((officer, index) => {
                 const { officer_name, officer_title, officer_address } = officer
                 if (!officer_name || !officer_title || !officer_address) return null
 

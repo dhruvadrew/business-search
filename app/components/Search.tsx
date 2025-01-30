@@ -87,7 +87,7 @@ const fetchBusinesses = async (query: string): Promise<BusinessData[]> => {
 export default function Search() {
   const [query, setQuery] = useState("")
   const [isMockData, setIsMockData] = useState(false)
-  const { data, isLoading, isError, error, refetch } = useQuery<BusinessData[], Error>({
+  const { data, isLoading, isError, refetch } = useQuery<BusinessData[], Error>({
     queryKey: ["businesses", query],
     queryFn: () => fetchBusinesses(query),
     enabled: false,
