@@ -34,7 +34,7 @@ interface BusinessData {
 
 const getBusinessesFromDatabase = async (names: string[]): Promise<BusinessData[]> => {
   try {
-    const response = await fetch("http://localhost:8000/businesses", {
+    const response = await fetch("https://a6a2-152-3-43-47.ngrok-free.app/businesses", {
       method: "POST", 
       headers: {
         "Content-Type": "application/json",
@@ -55,7 +55,7 @@ const getBusinessesFromDatabase = async (names: string[]): Promise<BusinessData[
 
 const fetchBusinesses = async (query: string): Promise<BusinessData[]> => {
   try {
-    const response = await fetch("http://localhost:8000/crawl", {
+    const response = await fetch("https://a6a2-152-3-43-47.ngrok-free.app/crawl", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
