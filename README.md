@@ -48,6 +48,12 @@ This project is a web application built with Next.js that allows users to search
     pnpm install
     # or
     bun install
+
+    #front end dependencies (for clarification)
+    npm install @tanstack/react-query lucide-react
+
+    #back end dependencies (make sure to have pip!)
+    pip install playwright supabase py-dotenv beautifulsoup4 fastapi databases pydantic
     ```
 4.  Start the backend server (located in the `backend` directory). You'll need Python 3 and the required packages (as defined in `backend/requirements.txt`, if present).
 5.  Run the development server using the command provided in the Usage section.
@@ -112,16 +118,4 @@ The backend API (located in the `backend` directory) exposes the following endpo
 
 ## Dependencies
 
-The project dependencies are listed in the `package.json` file.  The backend dependencies (if any) should be listed in a `requirements.txt` file in the `backend` directory.
-
-## Contributing
-
-Contributions are welcome! Please open an issue or submit a pull request.
-
-## Testing
-
-(Add testing instructions if applicable)
-
-
-
-*README.md was made with [Etchr](https://etchr.dev)*
+The project dependencies are listed in the `package.json` file.
