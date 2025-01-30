@@ -379,9 +379,6 @@ async def crawl_and_save_html(user_input: str):
                     names.append(name)
                 else:
 
-                    # Wait for the page to load
-                    #await page.wait_for_load_state('networkidle')
-
                     # Extract business details
                     print("Extracting business details...")
                     business_data = await extract_business_details(page)
@@ -394,9 +391,6 @@ async def crawl_and_save_html(user_input: str):
                     # Go back to the previous page
                     print("Going back to the previous page...")
                     await page.go_back()
-
-                    # Wait for the page to load again after going back
-                    #await page.wait_for_load_state('networkidle')
 
             # Re-query the links after going back to ensure they're valid
             print("Re-querying the links after going back...")
@@ -428,9 +422,6 @@ async def crawl_and_save_html(user_input: str):
                     links = await page.query_selector_all('table tbody a[href]')
                     continue
 
-                # Wait for the page to load
-                #await page.wait_for_load_state('networkidle')
-
                 # Extract business details
                 print("Extracting business details...")
                 business_data = await extract_business_details(page)
@@ -443,10 +434,6 @@ async def crawl_and_save_html(user_input: str):
                 # Go back to the previous page
                 print(f"Going back to the previous page after opening link {i+1}...")
                 await page.go_back()
-                
-
-                # Wait for the page to load again after going back
-                #await page.wait_for_load_state('networkidle')
 
                 # Re-query the links after going back to ensure they're valid
                 print(f"Re-querying the links after going back from link {i+1}...")
