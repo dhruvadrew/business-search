@@ -55,8 +55,13 @@ This project is a web application built with Next.js, FastAPI, Supabase, and Pla
     #back end dependencies (make sure to have pip!)
     pip install playwright supabase py-dotenv beautifulsoup4 fastapi databases pydantic
     ```
-4.  Start the backend server (located in the `backend` directory). You'll need Python 3 and the required packages (as defined in `backend/requirements.txt`, if present).
-5.  Run the development server using the command provided in the Usage section.
+4.  Start the backend server (located in the `backend` directory). You'll need Python 3, pip, and more as mentioned below.
+    ```bash
+    #back end dependencies (make sure to have pip!), cd backend, runs on localhost:8000 or note ip address given in console
+    pip install playwright supabase py-dotenv beautifulsoup4 fastapi databases pydantic
+    uvicorn main:app --reload
+    ```
+6.  Run the development server using the command provided in the Usage section.
 
 ## Technologies Used
 
