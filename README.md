@@ -1,6 +1,6 @@
 # Florida Secretary of State Business Search Tool
 
-This project is a web application built with Next.js that allows users to search for registered businesses in Florida.  It leverages a backend service to crawl and scrape data from the Florida Secretary of State's website and store it in a Supabase database. The application provides a user-friendly interface for searching and viewing detailed business information.
+This project is a web application built with Next.js, FastAPI, Supabase, and Playwright that allows users to search for registered businesses in Florida.  It leverages a backend service to crawl and scrape data from the Florida Secretary of State's website and store it in a Supabase database. The application provides a user-friendly interface for searching and viewing detailed business information.
 
 ## Features
 
