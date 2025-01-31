@@ -41,7 +41,7 @@ interface OfficerDetail {
 
 const getBusinessesFromDatabase = async (names: string[]): Promise<BusinessData[]> => {
   try {
-    const response = await fetch("https://a6a2-152-3-43-47.ngrok-free.app/businesses", {
+    const response = await fetch("https://7d93-152-3-43-47.ngrok-free.app/businesses", {
       method: "POST", 
       headers: {
         "Content-Type": "application/json",
@@ -62,7 +62,7 @@ const getBusinessesFromDatabase = async (names: string[]): Promise<BusinessData[
 
 const fetchBusinesses = async (query: string): Promise<BusinessData[]> => {
   try {
-    const response = await fetch("https://a6a2-152-3-43-47.ngrok-free.app/crawl", {
+    const response = await fetch("https://7d93-152-3-43-47.ngrok-free.app/crawl", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
